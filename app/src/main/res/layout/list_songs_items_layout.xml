@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="left"
+    android:background="@drawable/list_selector"
+    >
+
+    <!--Tên bài hát-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:id="@+id/tvSongTitle"
+        android:text="@string/song_title"
+        android:textColor="@color/colorDark"
+        android:textSize="15dp"
+        android:textStyle="bold"
+        android:typeface="serif"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="1dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Tên ca sĩ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvArtist"
+            android:text="@string/artist"
+            android:textColor="@color/colorDark"
+            android:textSize="10dp"
+            android:typeface="serif"
+            android:layout_marginLeft="10dp"/>
+
+        <!--Thời gian bài hát-->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:layout_gravity="bottom"
+            android:id="@+id/tvDuration"
+            android:text="@string/time"
+            android:textColor="@color/colorDark"
+            android:textSize="10dp"
+            android:layout_marginRight="10dp" />
+    </LinearLayout>
+</LinearLayout>
