@@ -43,7 +43,7 @@ public class StartActivity extends TabActivity{
         btnPlay = (ImageButton) findViewById(R.id.btnPlay);
         btnPrevious = (ImageButton) findViewById(R.id.btnPrevious);
 
-        TabHost tabHost = getTabHost();
+        //TabHost tabHost = getTabHost();
         // Tab for Songs
         TabHost.TabSpec songsSpec = tabHost.newTabSpec("Songs");
         songsSpec.setIndicator("Songs", ResourcesCompat.getDrawable(getResources(), R.drawable.icon_songs, null));
