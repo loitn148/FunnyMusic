@@ -1,6 +1,6 @@
-<!--<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.deitel.funnymusic">-->
+    package="com.deitel.funnymusic">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
@@ -28,4 +28,4 @@
         </activity>
     </application>
 
-</manifest>
+<!--nifest>-->
