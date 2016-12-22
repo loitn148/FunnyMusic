@@ -15,13 +15,13 @@ public class Song {
     private int duration;
 
     public Song(String id, String name, String title, String album, String artist, String path, int duration) {
-        //this.id = id;
-        //this.name = name;
+        this.id = id;
+        this.name = name;
         this.title = title;
         this.album = album;
-        this.artist = artist;
-        this.path = path;
-        this.duration = duration;
+        //this.artist = artist;
+        //this.path = path;
+        //this.duration = duration;
     }
 
     public String getId() {
