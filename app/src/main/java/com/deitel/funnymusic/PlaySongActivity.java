@@ -1,12 +1,9 @@
 package com.deitel.funnymusic;
 
 /**
- * Created by NgocLoi on 12/2/2016.
+ * Created by NgocLoi on 12/6/2016.
  */
-
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -14,12 +11,19 @@ import android.content.pm.ResolveInfo;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,22 +33,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static android.R.attr.data;
-import static android.R.attr.mediaRouteButtonStyle;
-
 public class PlaySongActivity extends AppCompatActivity
-        implements MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener{
+        implements MediaPlayer.OnCompletionListener, SeekBar.OnSeekBarChangeListener {
 
+    private SpeechRecognizer speechRecognizer;
     private SeekBar seekBar;
     private TextView tvCurrentTime, tvTotalTime, tvSongTitle, tvArtist;
+    private ImageView ivCircle;
     private ImageButton btnPlay, btnNext, btnPrevious, btnRepeat, btnShuffle, btnListSongs, btnSpeak;
 
-    private boolean isRepeat, isShuffle;
+    private Animation rotateAnimation;
+
     private int songPosition;
-    private int songDuration;
     private ArrayList<Song> songsList;
 
-    private MediaPlayer mediaPlayer;
     private Handler handler;
 
 
@@ -52,7 +54,6 @@ public class PlaySongActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play_song_layout);
-
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         tvCurrentTime = (TextView) findViewById(R.id.tvCurrentTime);
         tvTotalTime = (TextView) findViewById(R.id.tvTotalTime);
@@ -65,25 +66,26 @@ public class PlaySongActivity extends AppCompatActivity
         btnShuffle = (ImageButton) findViewById(R.id.btnShuffle);
         btnListSongs = (ImageButton) findViewById(R.id.btnListSongs);
         btnSpeak = (ImageButton) findViewById(R.id.btnSpeak);
+        ivCircle = (ImageView) findViewById(R.id.ivCircle);
 
-        mediaPlayer = new MediaPlayer();
         handler = new Handler();
-        songsList = Util.getListSongs(this);
-        isRepeat = false;
-        isShuffle = false;
+        songsList = Util.LIST_SONGS_PLAY;
 
         seekBar.setOnSeekBarChangeListener(this);
-        mediaPlayer.setOnCompletionListener(this);
-        checkVoiceRecognition();
+        Util.mediaPlayer.setOnCompletionListener(this);
 
-        songPosition = getIntent().getIntExtra(Util.KEY_SONG_POSITION, 0);
-        setDefaultInfo();
+        songPosition = getIntent().getIntExtra(Util.KEY_SONG_POSITION, -1);
         playSong(songPosition);
+
+        rotateAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate);
+
+        setDefaultInfo();
+        checkVoiceRecognition();
     }
 
     public void checkVoiceRecognition() {
         Log.v("", "checkVoiceRecognition checkVoiceRecognition");
-        // Kiem tra thiet bi cho phep nhan dang giong noi hay ko
+        // Kiểm tra thiết bị có cho phép nhận dạnh giọng nói
         PackageManager pm = getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
         if (activities.size() == 0) {
@@ -93,179 +95,225 @@ public class PlaySongActivity extends AppCompatActivity
     }
 
     public void playAction(View v) {
-        if (mediaPlayer.isPlaying()) {
+        ivCircle.startAnimation(rotateAnimation);
+        if (Util.mediaPlayer.isPlaying()) {
             btnPlay.setBackgroundResource(R.drawable.btn_play_xml);
-            mediaPlayer.pause();
+            Util.mediaPlayer.pause();
+
         } else {
             btnPlay.setBackgroundResource(R.drawable.btn_pause_xml);
-            mediaPlayer.start();
+            Util.mediaPlayer.start();
         }
-
     }
 
     public void previousAction(View v) {
-        if(songPosition > 0){
-            playSong(songPosition - 1);
-            songPosition = songPosition - 1;
-        }
-        else {
-            playSong(songsList.size() - 1);
-            songPosition = songsList.size() - 1;
+        ivCircle.startAnimation(rotateAnimation);
+        if (Util.IS_SHUFFLE == 1) {
+            // shuffle on, random bài songPosition
+            Random rand = new Random();
+            songPosition = rand.nextInt((songsList.size() - 1) - 0 + 1) + 0;
+            playSong(songPosition);
+        } else {
+            if (songPosition > 0) {
+                playSong(songPosition - 1);
+                songPosition = songPosition - 1;
+            } else {
+                playSong(songsList.size() - 1);
+                songPosition = songsList.size() - 1;
+            }
         }
     }
 
     public void nextAction(View v) {
-        if(songPosition < songsList.size() - 1){
-            playSong(songPosition + 1);
-            songPosition = songPosition + 1;
-        }
-        else {
-            playSong(0);
-            songPosition = 0;
-        }
-    }
-
-    public void forwardAction(View v){
-
-        int currentPosition = mediaPlayer.getCurrentPosition();
-
-        if (currentPosition + Util.FORWARD_TIME <= mediaPlayer.getDuration()) {
-
-            mediaPlayer.seekTo(currentPosition + Util.FORWARD_TIME);
+        ivCircle.startAnimation(rotateAnimation);
+        if (Util.IS_SHUFFLE == 1) {
+            // shuffle on, random bài songPosition
+            Random rand = new Random();
+            songPosition = rand.nextInt((songsList.size() - 1) - 0 + 1) + 0;
+            playSong(songPosition);
         } else {
-
-            mediaPlayer.seekTo(mediaPlayer.getDuration());
+            if (songPosition < songsList.size() - 1) {
+                playSong(songPosition + 1);
+                songPosition = songPosition + 1;
+            } else {
+                playSong(0);
+                songPosition = 0;
+            }
         }
     }
 
-    public void backwardAction(View v){
-        int currentPosition2 = mediaPlayer.getCurrentPosition();
-        // check if seekBackward time is greater than 0 sec
-        if (currentPosition2 - Util.BACKWARD_TIME >= 0) {
-            // forward song
-            mediaPlayer.seekTo(currentPosition2 - Util.BACKWARD_TIME);
+    public void repeatAction(View v) {
+        if (Util.IS_REPEAT == 0) {
+            Util.IS_REPEAT = 1;
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat_all);
+        } else if (Util.IS_REPEAT == 1) {
+            Util.IS_REPEAT = 2;
+            Util.IS_SHUFFLE = 0;
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat_one);
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle);
         } else {
-            // backward to starting position
-            mediaPlayer.seekTo(0);
+            Util.IS_REPEAT = 0;
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat);
         }
     }
 
-    public void speakAction(View v){
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        // xac nhan ung dung muon gui yeu cau
-        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
-
-        // goi y nhung dieu nguoi dung muon noi
-        //intent.putExtra(RecognizerIntent.EXTRA_PROMPT, metTextHint.getText().toString());
-
-        // goi y nhan dang nhung gi nguoi dung se noi
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-
-        /* / Kiem tra item muon hien thi da chon tron spinner
-        /if (msTextMatches.getSelectedItemPosition() == AdapterView.INVALID_POSITION) {
-            Toast.makeText(this, "Please select No. of Matches from spinner", Toast.LENGTH_SHORT).show();
-            return;
-        }*/
-
-        //int noOfMatches = Integer.parseInt(msTextMatches.getSelectedItem().toString());
-
-        // Xac dinh ban muon bao nhieu ket qua gan dung duoc tra ve
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
-
-        // Gui yeu cau di
-        startActivityForResult(intent, Util.VOICE_RECOGNITION_REQUEST_CODE);
-
+    public void shuffleAction(View v) {
+        if (Util.IS_SHUFFLE == 0 && Util.IS_REPEAT != 2) {
+            Util.IS_SHUFFLE = 1;
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle_on);
+        } else if (Util.IS_SHUFFLE == 0 && Util.IS_REPEAT == 2) {
+            Util.IS_SHUFFLE = 1;
+            Util.IS_REPEAT = 0;
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle_on);
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat);
+        } else {
+            Util.IS_SHUFFLE = 0;
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle);
+        }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode, Intent data){
+    public void playListAction(View v) {
+        Intent i = new Intent(getApplicationContext(), PlayListActivity.class);
+        startActivityForResult(i, 100);
+    }
+
+    public void speakAction(View v) {
+        Intent speechIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        //Xác nhận ứng dụng muốn gửi yêu cầu
+        speechIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getClass().getPackage().getName());
+        //Giá trị nhỏ nhất của thời gian nghe
+        speechIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 1000);
+        //Xác định bạn muốn bao nhiêu kết quả gần đúng được trả về
+        speechIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        //Gửi yêu cầu đi
+        startActivityForResult(speechIntent, Util.VOICE_RECOGNITION_REQUEST_CODE);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Util.VOICE_RECOGNITION_REQUEST_CODE)
-            // Truong hop co gia tri tra ve
-            if(resultCode == RESULT_OK) {
+            //Trường hợp có giá trị trả về
+            if (resultCode == RESULT_OK) {
                 ArrayList<String> textMatchList = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
                 if (!textMatchList.isEmpty()) {
-                    // kiem tra neu co chua tu khoa 'search' thi se bat dau tim kiem tren web
+                    //Nếu trong list Match có từ khoá seach thì sẽ tiến hành search trên mạng
                     if (textMatchList.get(0).contains("search")) {
                         String searchQuery = textMatchList.get(0).replace("search", " ");
                         Intent search = new Intent(Intent.ACTION_WEB_SEARCH);
                         search.putExtra(SearchManager.QUERY, searchQuery);
                         startActivity(search);
                     } else {
-                        String pause = "pause";
-                        String play = "play";
-                        String next = "next";
-                        String previous = "previous";
-                        // Hien thi ket qua
-                        //mlvTextMatches.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, textMatchList));
-                        for(String str : textMatchList){
-
-                            if(str.toString().equals(next)){
-                                if(songPosition < songsList.size() - 1){
-                                    playSong(songPosition + 1);
-                                    songPosition = songPosition + 1;
-                                }
-                                else {
-                                    playSong(0);
-                                    songPosition = 0;
-                                }
+                        String str = textMatchList.get(0);
+                        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+                        if (str.equalsIgnoreCase(Util.KEY_PLAY)) {
+                            if (!Util.mediaPlayer.isPlaying()) {
+                                btnPlay.setBackgroundResource(R.drawable.btn_pause_xml);
+                                Util.mediaPlayer.start();
+                            }
+                        } else if (str.equalsIgnoreCase(Util.KEY_PAUSE)) {
+                            if (Util.mediaPlayer.isPlaying()) {
+                                btnPlay.setBackgroundResource(R.drawable.btn_play_xml);
+                                Util.mediaPlayer.pause();
                             }
                         }
+                        else if(str.equalsIgnoreCase(Util.KEY_NEXT))
+                            nextAction(new View(this));
+                        else if(str.equalsIgnoreCase(Util.KEY_PREVIOUS))
+                            previousAction(new View(this));
+                        else if(str.equalsIgnoreCase(Util.KEY_PLAYLIST))
+                            playListAction(new View(this));
+                        else if(str.equalsIgnoreCase(Util.KEY_REPEAT))
+                            repeatAction(new View(this));
+                        else if(str.equalsIgnoreCase(Util.KEY_SHUFFLE))
+                            shuffleAction(new View(this));
+                        else {
+                            Util.LIST_SONGS_SEARCH.clear();
+                            String strRemoveAccent = Util.removeAccent(str);
+                            for (Song song : Util.getListSongs(this)) {
+                                if (song.getTitle().toLowerCase().contains(str.toLowerCase())
+                                        || song.getTitle().toLowerCase().contains(strRemoveAccent.toLowerCase())
+                                        || song.getAlbum().toLowerCase().contains(str.toLowerCase())
+                                        || song.getAlbum().toLowerCase().contains(strRemoveAccent.toLowerCase())
+                                        || song.getArtist().toLowerCase().contains(str.toLowerCase())
+                                        || song.getArtist().toLowerCase().contains(strRemoveAccent.toLowerCase())) {
+                                    Util.LIST_SONGS_SEARCH.add(song);
+                                }
+                            }
+                            if (!Util.LIST_SONGS_SEARCH.isEmpty()) {
+                                Util.VOICE_RECOGNIZE = str;
+                                Intent intentViewSearch = new Intent(getApplicationContext(), ListSongsSearchActivity.class);
+                                startActivityForResult(intentViewSearch, Util.OPEN_ACTIVITY_LIST_SONGS_SEARCH);
+                            }
+                        }
+
                     }
                 }
-                // Cac truong hop loi
-            } else if (resultCode == RecognizerIntent.RESULT_AUDIO_ERROR){
+                //Các trường hợp lỗi
+            } else if (resultCode == RecognizerIntent.RESULT_AUDIO_ERROR) {
                 showToastMessage("Audio Error");
-            } else if (resultCode == RecognizerIntent.RESULT_CLIENT_ERROR){
+            } else if (resultCode == RecognizerIntent.RESULT_CLIENT_ERROR) {
                 showToastMessage("Client Error");
-            } else if (resultCode == RecognizerIntent.RESULT_NETWORK_ERROR){
+            } else if (resultCode == RecognizerIntent.RESULT_NETWORK_ERROR) {
                 showToastMessage("Network Error");
-            } else if (resultCode == RecognizerIntent.RESULT_NO_MATCH){
+            } else if (resultCode == RecognizerIntent.RESULT_NO_MATCH) {
                 showToastMessage("No Match");
-            } else if (resultCode == RecognizerIntent.RESULT_SERVER_ERROR){
+            } else if (resultCode == RecognizerIntent.RESULT_SERVER_ERROR) {
                 showToastMessage("Server Error");
             }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    void showToastMessage(String message){
+    public void showToastMessage(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-
-    private void setDefaultInfo() {
+    public void setDefaultInfo() {
         String songTitle = songsList.get(songPosition).getTitle();
         String songArtist = songsList.get(songPosition).getArtist();
+
+        if (Util.IS_REPEAT == 1) {
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat_all);
+        } else if (Util.IS_REPEAT == 2) {
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat_one);
+        } else {
+            btnRepeat.setBackgroundResource(R.drawable.btn_repeat);
+        }
+
+        if (Util.IS_SHUFFLE == 1) {
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle_on);
+        } else {
+            btnShuffle.setBackgroundResource(R.drawable.btn_shuffle);
+        }
         tvSongTitle.setText(songTitle);
         tvCurrentTime.setText(Util.getTextFormat(0));
         tvTotalTime.setText(Util.getTextFormat(songsList.get(songPosition).getDuration()));
         tvArtist.setText(songArtist);
-        seekBar.setMax(songDuration);
+        seekBar.setMax(Util.mediaPlayer.getDuration());
         seekBar.setProgress(0);
     }
 
     private Runnable updateSongTime = new Runnable() {
         @Override
         public void run() {
-            if(mediaPlayer != null) {
+            if (Util.mediaPlayer != null) {
                 setDefaultInfo();
-                long currentTime = mediaPlayer.getCurrentPosition();
+                long currentTime = Util.mediaPlayer.getCurrentPosition();
                 tvCurrentTime.setText(Util.getTextFormat((int) currentTime));
-                seekBar.setMax(mediaPlayer.getDuration());
+                seekBar.setMax(Util.mediaPlayer.getDuration());
                 seekBar.setProgress((int) currentTime);
                 handler.postDelayed(this, Util.DELAY_MILLISECONDS);
             }
         }
     };
 
-    public void playSong(int position){
-        try{
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(songsList.get(songPosition).getPath());
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
+    public void playSong(int position) {
+        Util.SONG_POSITION = position;
+        try {
+            Util.mediaPlayer.reset();
+            Util.mediaPlayer.setDataSource(songsList.get(position).getPath());
+            Util.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            Util.mediaPlayer.prepare();
+            Util.mediaPlayer.start();
             btnPlay.setBackgroundResource(R.drawable.btn_pause_xml);
             updateProgressBar();
         } catch (IllegalArgumentException e) {
@@ -277,29 +325,31 @@ public class PlaySongActivity extends AppCompatActivity
         }
     }
 
-    public void updateProgressBar(){
+    public void updateProgressBar() {
         handler.postDelayed(updateSongTime, Util.DELAY_MILLISECONDS);
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         // Kiểm tra repeat on hay off
-        if(isRepeat){
+        if (Util.IS_REPEAT == 2) {
             playSong(songPosition);
-        } else if(isShuffle){
+        } else if (Util.IS_SHUFFLE == 1) {
             // shuffle on, random bài songPosition
             Random rand = new Random();
             songPosition = rand.nextInt((songsList.size() - 1) - 0 + 1) + 0;
             playSong(songPosition);
-        } else{
+        } else {
             // Repeat và shuffle off, chơi bài tiếp theo
-            if(songPosition < (songsList.size() - 1)){
+            if (songPosition < (songsList.size() - 1)) {
                 playSong(songPosition + 1);
                 songPosition = songPosition + 1;
-            }else{
+            } else if (Util.IS_REPEAT == 1) {
                 //cuối list, chơi bài đầu tiên
                 playSong(0);
                 songPosition = 0;
+            } else {
+                Util.mediaPlayer.stop();
             }
         }
     }
@@ -316,7 +366,13 @@ public class PlaySongActivity extends AppCompatActivity
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         handler.removeCallbacks(updateSongTime);
-        mediaPlayer.seekTo(seekBar.getProgress());
+        Util.mediaPlayer.seekTo(seekBar.getProgress());
         updateProgressBar();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
 }

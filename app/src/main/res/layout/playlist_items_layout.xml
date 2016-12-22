@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="left"
+    android:radius="5dp"
+    android:background="@drawable/divider"
+    android:layout_alignParentTop="true">
+
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/icon_drag"
+        android:background="@null"
+        android:layout_gravity="center"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="5dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <!--Tên bài hát-->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:id="@+id/tvSongTitle"
+            android:text="@string/song_title"
+            android:textColor="@color/colorWhite"
+            android:textSize="17dp"
+            android:textStyle="bold"
+            android:typeface="serif"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"/>
+
+        <!-- Tên ca sĩ -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvArtist"
+            android:text="@string/artist"
+            android:textColor="@color/colorWhite"
+            android:textSize="15dp"
+            android:typeface="serif"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="7dp"/>
+    </LinearLayout>
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/ivAinmNowPlaying"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/anim_now_playing"
+        android:background="@null"/>
+</LinearLayout>

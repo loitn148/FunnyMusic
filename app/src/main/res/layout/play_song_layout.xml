@@ -2,23 +2,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_bg"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/background_play">
 
     <android.support.v7.widget.Toolbar
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAzure"
+        android:background="@color/colorPrimary"
         android:theme="?attr/actionBarTheme"
         android:minHeight="?attr/actionBarSize"
         android:id="@+id/toolbar">
-
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Funny Music"
-            android:textSize="20dp"
+            android:textSize="17dp"
             android:typeface="monospace"
             android:textStyle="bold"
             android:textColor="@color/colorWhite"/>
@@ -49,9 +48,10 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/tvSongTitle"
                 android:layout_weight="1"
-                android:textColor="@color/colorDark"
+                android:textColor="@color/colorWhite"
                 android:textStyle="bold"
                 android:textSize="15dp"
+                android:layout_marginLeft="10dp"
                 android:text="@string/song_title" />
 
             <!--Tên ca sĩ-->
@@ -60,8 +60,9 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/tvArtist"
                 android:layout_weight="1"
-                android:textColor="@color/colorDark"
+                android:textColor="@color/colorWhite"
                 android:textSize="10dp"
+                android:layout_marginLeft="10dp"
                 android:text="@string/artist" />
 
         </LinearLayout>
@@ -71,7 +72,8 @@
             android:id="@+id/btnListSongs"
             android:layout_gravity="right"
             android:src="@drawable/btn_list_xml"
-            android:background="@null"/>
+            android:background="@null"
+            android:onClick="playListAction"/>
     </LinearLayout>
 
     <!--ảnh nốt nhạc-->
@@ -79,10 +81,12 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:id="@+id/ivCircle"
         android:layout_gravity="center_horizontal"
         android:layout_below="@+id/header"
-        android:src="@drawable/media_play"
-        android:layout_marginTop="20dp"/>
+        android:src="@drawable/img_play_circle"
+        android:layout_marginTop="10dp"/>
+
 
     <!--Footer-->
     <LinearLayout
@@ -93,20 +97,28 @@
         android:gravity="bottom"
         android:layout_alignParentBottom="true">
 
-        <!--Thời gian-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal">
+            android:gravity="center"
+            android:layout_alignParentBottom="true">
+
+
+
+
             <ImageButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/btnSpeak"
-                android:src="@drawable/btn_pause_xml"
+                android:src="@drawable/icon_micro"
                 android:background="@null"
+                android:id="@+id/btnSpeak"
                 android:onClick="speakAction"/>
 
+
+
         </LinearLayout>
+
+        <!--Thời gian-->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -115,7 +127,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvCurrentTime"
-                android:textColor="@color/colorDark"
+                android:textColor="@color/colorWhite"
                 android:text="00:00"/>
 
             <SeekBar
@@ -130,7 +142,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/tvTotalTime"
-                android:textColor="@color/colorDark"
+                android:textColor="@color/colorWhite"
                 android:text="@string/time"/>
         </LinearLayout>
 
@@ -149,9 +161,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/btnShuffle"
                 android:background="@drawable/btn_shuffle"
-                android:layout_marginRight="10dp"
-                android:scaleX="0.7"
-                android:scaleY="0.7"
+                android:layout_marginRight="20dp"
                 android:onClick="shuffleAction"/>
 
             <!--Quay về bài trước-->
@@ -160,17 +170,10 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/btnPrevious"
                 android:background="@drawable/btn_previous_xml"
-                android:layout_marginRight="6dp"
+                android:layout_marginRight="15dp"
                 android:onClick="previousAction"/>
 
             <!--Tua lùi-->
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btnBackward"
-                android:background="@drawable/btn_backward_xml"
-                android:layout_marginRight="6dp"
-                android:onClick="backwardAction"/>
 
             <!--Play/Pause-->
             <ImageButton
@@ -181,13 +184,6 @@
                 android:onClick="playAction"/>
 
             <!--Tua tới-->
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/btnForward"
-                android:background="@drawable/btn_foward_xml"
-                android:layout_marginLeft="6dp"
-                android:onClick="forwardAction"/>
 
             <!--Bài kế tiếp-->
             <ImageButton
@@ -195,7 +191,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/btnNext"
                 android:background="@drawable/btn_next_xml"
-                android:layout_marginLeft="6dp"
+                android:layout_marginLeft="15dp"
                 android:onClick="nextAction"/>
 
             <!--Lặp lại-->
@@ -204,10 +200,10 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/btnRepeat"
                 android:background="@drawable/btn_repeat"
-                android:layout_marginLeft="10dp"
-                android:scaleX="0.7"
-                android:scaleY="0.7"
+                android:layout_marginLeft="20dp"
                 android:onClick="repeatAction"/>
+
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>

@@ -1,7 +1,7 @@
 package com.deitel.funnymusic;
 
 /**
- * Created by NgocLoi on 12/2/2016.
+ * Created by NgocLoi on 12/6/2016.
  */
 
 public class Song {
@@ -19,9 +19,9 @@ public class Song {
         this.name = name;
         this.title = title;
         this.album = album;
-        //this.artist = artist;
-        //this.path = path;
-        //this.duration = duration;
+        this.artist = artist;
+        this.path = path;
+        this.duration = duration;
     }
 
     public String getId() {
