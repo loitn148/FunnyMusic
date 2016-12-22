@@ -21,7 +21,7 @@ public class ListSongsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.list_songs_layout);
+        //setContentView(R.layout.list_songs_layout);
 
 
         listSongs.addAll(Util.getListSongs(this));
